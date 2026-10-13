@@ -1,14 +1,18 @@
-﻿using Domain.SharedKernel.Common;
-using Domain.SharedKernel.Entities;
+﻿using Domain.SharedKernel.Entities;
 
 namespace Modules.System.Identity.Domain.Entities
 {
-    public class User : AuditableEntity, IMustHaveTenant
+    public enum UserType:byte
+    {
+        System = 1,
+        Tenant = 2
+    }
+    public class User : AuditableEntity
     {
         public User() : base(17) { }
         public User(ulong id) : base(id, 17) { }
         public User(Guid id) : base(id) { }
-        public User(Guid tenantId, string userName, string email,  string? firstName, string? lastName, bool isActive=true) : base(17)
+        public User(Guid? tenantId, string userName, string email,  string? firstName, string? lastName, bool isActive=true) : base(17)
         {
             TenantId = tenantId;
             UserName = userName;
@@ -19,7 +23,7 @@ namespace Modules.System.Identity.Domain.Entities
             IsActive = isActive;
            
         }
-        public User(Guid id,Guid tenantId, string userName, string email, string? firstName, string? lastName, bool isActive = true) : base(id)
+        public User(Guid id,Guid? tenantId, string userName, string email, string? firstName, string? lastName, bool isActive = true) : base(id)
         {
             TenantId = tenantId;
             UserName = userName;
@@ -31,8 +35,8 @@ namespace Modules.System.Identity.Domain.Entities
 
         }
         public Guid? ImageId { get; set; }
-        public Guid TenantId { get; set; }
-
+        public Guid? TenantId { get; set; }
+        public UserType UserTpe { get; set; }
         public string UserName { get; set; } = default!;
         public string NormalizedUserName { get; set; } = default!;
 

@@ -19,19 +19,19 @@ public sealed class DefaultIdentitySeedContributor : ISeedContributor
 
         await SeedOpenIddictAsync(applicationManager);
         await EnsureTenantAsync(db, DefaultSeedData.MasterTenant);
-        await EnsureTenantsAsync(db, DefaultSeedData.Tenants);
+        //await EnsureTenantsAsync(db, DefaultSeedData.Tenants);
 
 
-        await EnsureModulesAsync(db, DefaultSeedData.Modules);
-        await EnsureResourcesAsync(db, DefaultSeedData.Resources);
-        await EnsureUiAsync(db, DefaultSeedData.UiResources.ToArray());
-        await EnsureApiAsync(db, DefaultSeedData.ApiResources.ToArray());
-        await EnsureTenantModulesAsync(db, DefaultSeedData.TenantModules);
-        await EnsurePermissionsAsync(db, DefaultSeedData.Permissions);
-        await EnsureUserRoleAsync(db, DefaultSeedData.UserRoles.ToArray());
-        await EnsureRoleAsync(db, DefaultSeedData.Roles.ToArray());
-        await EnsureRolePermissionsAsync(db, DefaultSeedData.RolePermissions.ToArray());
-        await EnsureMenuAsync(db, DefaultSeedData.MenuCategories.ToArray());
+        //await EnsureModulesAsync(db, DefaultSeedData.Modules);
+        //await EnsureResourcesAsync(db, DefaultSeedData.Resources);
+        //await EnsureUiAsync(db, DefaultSeedData.UiResources.ToArray());
+        //await EnsureApiAsync(db, DefaultSeedData.ApiResources.ToArray());
+        //await EnsureTenantModulesAsync(db, DefaultSeedData.TenantModules);
+        //await EnsurePermissionsAsync(db, DefaultSeedData.Permissions);
+        //await EnsureUserRoleAsync(db, DefaultSeedData.UserRoles.ToArray());
+        //await EnsureRoleAsync(db, DefaultSeedData.Roles.ToArray());
+        //await EnsureRolePermissionsAsync(db, DefaultSeedData.RolePermissions.ToArray());
+        //await EnsureMenuAsync(db, DefaultSeedData.MenuCategories.ToArray());
     }
 
     private static async Task SeedOpenIddictAsync(IOpenIddictApplicationManager applicationManager)

@@ -101,7 +101,7 @@ namespace Modules.System.Identity
 
             app.UseAuthentication();
             app.UseAuthorization();
-            //DbSeeder.SeedAsync(app.Services).Wait();
+            DbSeeder.SeedAsync(app.Services).Wait();
             //app.UseMiddleware<PermissionMiddleware>();
             app.UseMiddleware<TenantResolutionMiddleware>();
             app.MapEndpoints($"{configuration["BackendPrefix"]}System");

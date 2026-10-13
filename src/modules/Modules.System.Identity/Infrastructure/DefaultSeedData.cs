@@ -152,10 +152,10 @@ public static class DefaultSeedData
     };
     public static IReadOnlyList<User> Users = new List<User>
     {
-        new(Guid(Entities.User,1),Guid(Entities.Tenant,1),"admin","admin@master.ir","admin","admin"),
-        new(Guid(Entities.User,2),Guid(Entities.Tenant,3),"admin","admin@restafe.ir","admin","admin"),
-        new(Guid(Entities.User,3),Guid(Entities.Tenant,2),"admin","admin@line.ir","admin","admin"),
-        new(Guid(Entities.User,4)!,Guid(Entities.Tenant,4),"admin","super@beaunail.ir","admin","admin"),
+        new(Guid(Entities.User,1),null,"admin","admin@master.ir","admin","admin"),
+        //new(Guid(Entities.User,2),Guid(Entities.Tenant,3),"admin","admin@restafe.ir","admin","admin"),
+        //new(Guid(Entities.User,3),Guid(Entities.Tenant,2),"admin","admin@line.ir","admin","admin"),
+        //new(Guid(Entities.User,4)!,Guid(Entities.Tenant,4),"admin","super@beaunail.ir","admin","admin"),
     };
     public static IReadOnlyList<UserRole> UserRoles = new List<UserRole>
     {

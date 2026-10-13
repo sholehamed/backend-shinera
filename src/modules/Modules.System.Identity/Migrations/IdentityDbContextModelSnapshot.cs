@@ -17,7 +17,7 @@ namespace Modules.Identity.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -1114,7 +1114,7 @@ namespace Modules.Identity.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("TenantId")
+                    b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UserName")
@@ -1122,16 +1122,21 @@ namespace Modules.Identity.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<byte>("UserTpe")
+                        .HasColumnType("tinyint");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedAt")
                         .IsDescending();
 
                     b.HasIndex("TenantId", "NormalizedEmail")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.HasIndex("TenantId", "NormalizedUserName")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("Users");
                 });
@@ -1649,7 +1654,7 @@ namespace Modules.Identity.Migrations
             modelBuilder.Entity("Modules.System.Identity.Domain.Entities.Permission", b =>
                 {
                     b.HasOne("Modules.System.Identity.Domain.Entities.Resource", "Resource")
-                        .WithMany()
+                        .WithMany("Permissions")
                         .HasForeignKey("ResourceId");
 
                     b.Navigation("Resource");
@@ -1793,9 +1798,7 @@ namespace Modules.Identity.Migrations
                 {
                     b.HasOne("Modules.System.Identity.Domain.Entities.Tenant", "Tenant")
                         .WithMany("Users")
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TenantId");
 
                     b.Navigation("Tenant");
                 });
@@ -1943,6 +1946,8 @@ namespace Modules.Identity.Migrations
             modelBuilder.Entity("Modules.System.Identity.Domain.Entities.Resource", b =>
                 {
                     b.Navigation("ApiResources");
+
+                    b.Navigation("Permissions");
 
                     b.Navigation("UiResources");
                 });
