@@ -127,9 +127,8 @@ IIdentityDbContext db,
 IPasswordHasher<User> passwordHasher,
 CancellationToken cancellationToken)
     {
-        string login_context = "tenant";
         var request = httpContext.GetOpenIddictServerRequest();
-        login_context = request.GetParameter("login_context")!.Value.ToString()!;
+
 
         if (request is null)
             return Results.BadRequest(new
@@ -154,7 +153,14 @@ CancellationToken cancellationToken)
             return Results.SignIn(result.Principal!,
                 authenticationScheme: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
-
+        string login_context = "tenant";
+        login_context = request.GetParameter("login_context")!.Value.ToString()!;
+        if (login_context is not ("system" or "tenant"))
+            return Results.BadRequest(new
+            {
+                error = "invalid_request",
+                error_description = "Invalid login context."
+            });
         var t = captchaService.Validate(token, input);
 
         if (!request.IsPasswordGrantType())
@@ -307,7 +313,8 @@ CancellationToken cancellationToken)
         new(OpenIddictConstants.Claims.Picture, user.ImageId.ToString()!),
         new(OpenIddictConstants.Claims.GivenName, $"{user.FirstName} {user.LastName}"),
         new("tenant_id", tenant.Id.ToString()),
-        new("tenant", tenant.Slug)
+        new("tenant", tenant.Slug),
+        new Claim("account_type", "tenant")
     };
 
             claims.AddRange(roles.Select(role => new Claim(OpenIddictConstants.Claims.Role, role)));
@@ -355,10 +362,10 @@ CancellationToken cancellationToken)
         }
         else
         {
-            
 
-            
-            
+
+
+
 
             var normalizedUserName = request.Username?.Trim().ToUpperInvariant();
             if (string.IsNullOrWhiteSpace(normalizedUserName) || string.IsNullOrWhiteSpace(request.Password))
@@ -374,8 +381,11 @@ CancellationToken cancellationToken)
 
             var user = await db.Users.IgnoreQueryFilters(["tenant"])
                 .FirstOrDefaultAsync(x =>
-                    x.NormalizedUserName == normalizedUserName &&
-                    x.IsActive, cancellationToken);
+        x.NormalizedUserName == normalizedUserName &&
+        x.UserTpe == UserType.System &&
+        x.TenantId == null &&
+        x.IsActive,
+        cancellationToken);
 
             if (user is null)
             {
@@ -433,18 +443,18 @@ CancellationToken cancellationToken)
 
             // ۱. استخراج تمامی دسترسی‌های معتبر کاربر (مستقیم + نقش‌های مستقیم + نقش‌های گروه‌ها)
             var permissions = await db.UserPermissions.IgnoreQueryFilters(["tenant"])
-                .Where(x =>  x.UserId == user.Id && x.IsGranted)
+                .Where(x => x.UserId == user.Id && x.IsGranted)
                 .Select(x => x.Permission.Name)
                 .Union(
                     // دسترسی‌های ناشی از نقش‌های مستقیم کاربر
                     db.UserRoles.IgnoreQueryFilters(["tenant"])
-                        .Where(x =>  x.UserId == user.Id)
+                        .Where(x => x.UserId == user.Id)
                         .SelectMany(x => x.Role.RolePermissions.Select(rp => rp.Permission.Name))
                 )
                 .Union(
                     // دسترسی‌های ناشی از نقش‌های انتساب‌داده‌شده به گروه‌های کاربر
                     db.UserGroups.IgnoreQueryFilters(["tenant"])
-                        .Where(x =>  x.UserId == user.Id)
+                        .Where(x => x.UserId == user.Id)
                         .SelectMany(x => x.Group.GroupRoles
                             .SelectMany(gr => gr.Role.RolePermissions.Select(rp => rp.Permission.Name)))
                 )
@@ -453,12 +463,12 @@ CancellationToken cancellationToken)
 
             // ۲. استخراج تمامی نقش‌های کاربر (نقش‌های مستقیم + نقش‌های به ارث رسیده از گروه‌ها)
             var roles = await db.UserRoles.IgnoreQueryFilters(["tenant"])
-                .Where(x =>  x.UserId == user.Id)
+                .Where(x => x.UserId == user.Id)
                 .Select(x => x.Role.Name)
                 .Union(
                     // نقش‌هایی که کاربر از طریق عضویت در گروه‌ها به دست آورده است
                     db.UserGroups.IgnoreQueryFilters(["tenant"])
-                        .Where(x =>  x.UserId == user.Id)
+                        .Where(x => x.UserId == user.Id)
                         .SelectMany(x => x.Group.GroupRoles.Select(gr => gr.Role.Name))
                 )
                 .Distinct()
@@ -472,6 +482,7 @@ CancellationToken cancellationToken)
         new(OpenIddictConstants.Claims.Email, user.Email),
         new(OpenIddictConstants.Claims.Picture, user.ImageId.ToString()!),
         new(OpenIddictConstants.Claims.GivenName, $"{user.FirstName} {user.LastName}"),
+        new Claim("account_type", "system")
     };
 
             claims.AddRange(roles.Select(role => new Claim(OpenIddictConstants.Claims.Role, role)));
